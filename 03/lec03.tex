@@ -5,6 +5,12 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage{ucs}
+
+\lstset{
+    extendedchars=\true,
+    inputencoding=utf8x
+}
 
 \usetheme{Warsaw}
 \usecolortheme{lily}
@@ -229,7 +235,7 @@ _start:
 .globl _start
 
 .data
-msg: .string "Hello world\n"
+msg: .string "Hello, world\n"
 
 .text
 _start:
@@ -259,6 +265,126 @@ _start:
                 \item Продолжает развиваться (Последняя версия YASM --- 2011 год)
                 \item Есть литература на русском (FASM уходит) 
             \end{itemize}
+        \end{block}
+    \end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Hello, world}
+        \begin{block}{hello.asm}
+        \begin{verbatim}
+%include "stud_io.inc" ; подключаем файл с макросами
+global _start   ; объявляет метку _start как глобальную
+
+section .text   ; секция машинных команд
+_start:         ; с метки _start начинается выполнение
+  mov eax, 0    ; eax - счётчик цикла
+again:          ; тело цикла
+  PRINT "Hello" ; макрос вывода строк
+  PUTCHAR 10    ; 10 - код символа переноса строки
+  inc eax       ; eax := eax + 1
+  cmp eax, 5    ; стравнить eax и 5 (eax - 5)
+  jl again      ; jump less (прыгнуть если меньше)
+
+  FINISH        ; макрос завершения программы
+        \end{verbatim}
+        \end{block}
+\end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Этапы сборки компилируемых программ}
+        \begin{block}{Сборка и выполнение hello.asm}
+        \begin{verbatim}
+nasm -f elf -l hello.lst -o hello.o hello.asm
+ld -o hello hello.o
+./hello
+        \end{verbatim}
+        \end{block}
+\includegraphics[width=\linewidth]{fig/build.pdf}
+\end{frame}
+    \begin{frame}{Макросы}
+
+    {\bf Макрос} --- символьное имя, заменяющее несколько команд языка ассемблера
+
+    \begin{block}{Макросы из stud\_io.inc}
+        \begin{itemize}
+            \item {\tt PRINT} --- принимает в качестве параметра текстовыую строку, окружённую кавычками или апострофами и выводит её на экран
+            \item {\tt PUTCHAR} --- в качестве парметра принимает код символа, однобайтовый регистр ({\tt AL, AH, BL, BH, CL, CH, DL, DH}) или исполнительный адрес и выводит на экран символ с соответствующим кодом
+            \item {\tt GETCHAR} --- считывает код символа с клавиатуры и сохраняет его код в регистре {\tt EAX}. Если символов больше нет, то в регистр {\tt EAX} записывается -1 (0xFFFFFFFF)
+            \item {\tt FINISH} --- завершает выполнение программы
+        \end{itemize}
+    \end{block}
+    \end{frame}
+    \begin{frame}
+    \begin{block}{Укажите правильную последовательность операций}
+        \begin{enumerate}
+            \item компоновка
+            \item компиляция
+            \item ассемблирование
+            \item загрузка
+            \item выполнение
+        \end{enumerate}
+        \pause
+        Ответ: 2, 3, 1, 4, 5
+    \end{block}
+    \pause
+    \begin{block}{Какая инструкция уменьшает значение регистра на 1?}
+        \begin{enumerate}
+            \item mov
+            \item inc
+            \item \alt<4>{{\color{green}dec}}{dec}
+            \item cmp
+        \end{enumerate}
+    \end{block}
+    \end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Вопросы}
+        \begin{block}{Что делает эта программа?}
+        \begin{verbatim}
+%include "stud_io.inc"
+global _start
+
+section .text
+_start:
+    mov eax, 10
+again:
+    PUTCHAR al
+    dec eax
+    cmp eax, 0
+    jg again
+
+    FINISH
+        \end{verbatim}
+        \end{block}
+\end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Вопросы}
+        \begin{block}{Что делает эта программа?}
+        \begin{verbatim}
+%include "stud_io.inc"
+global _start
+
+section .text
+_start:
+    mov ecx, 0
+again:
+    GETCHAR
+    cmp eax, -1
+    je exit
+    inc ecx
+    jmp again
+    
+exit:
+    FINISH
+        \end{verbatim}
+        \end{block}
+\end{frame}
+    \begin{frame}{Краткие итоги}
+        \begin{block}{Что мы узнали сегодня}
+        \begin{itemize}
+            \item послушали краткую историю процессоров Intel
+            \item узнали что такое x86 и чем он отличается от x86-64
+            \item познакомились с азами архитектуры x86
+            \item выбрали ассемблер для дальнейшей работы
+            \item научились читать простые программы
+        \end{itemize}
         \end{block}
     \end{frame}
 \end{document}
