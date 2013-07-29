@@ -215,6 +215,132 @@ sub [a], dword 100  ; [a] := [a] - 100
         {\bf CMP} (Compare) --- вычитает второй операнд из первого (результат не сохраняется). CMP используется ради установки флагов и обычно за ним следует условный переход
 \end{frame}
     \begin{frame}[fragile]
-        \frametitle{Целочисленное умножение и деление}
+        \frametitle{Беззнаковое умножение и деление}
+        {\bf MUL } (multiplication) --- беззнаковое целочисленное умножения (в качестве операнда указывается только один множитель, второй задан неявно разрядностью операции)
+
+        {\bf DIV } (division) --- безнаковое челочисленное деление (в качестве операнда указывается делитель, делимое задётся неявно разрядностью операции)
+
+        {\bf При выполнении команды DIV не забудьте обнулить старшую часть делимого!}
+
+
+        \begin{table}\small
+            \begin{tabular}{|p{1cm}|p{2cm}|p{2cm}||c|c|c|}
+                \hline Разря-дность & \multicolumn{2}{|c||}{Умножение} & \multicolumn{3}{|c|}{Деление} \\
+                \hline  & неявный \newline множитель & результат \newline умножения & делимое & частное & остаток \\
+                \hline 8 & AL & AX &  AX & AL & AH \\
+                \hline 16 & AX & DX:AX & DX:AX & AX & DX \\
+                \hline 32 & EAX & EDX:EAX & EDX:EAX & EAX & EDX \\
+                \hline
+            \end{tabular}
+        \end{table}
 \end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Знаковое умножение и деление}
+        {\bf iMUL } (multiplication) --- знаковое целочисленное умножение. Имеет форму с одним, двумя или тремя операндами.
+
+        {\bf iDIV } (division) --- знаковое целочисленное деление (в качестве операнда указывается делитель, делимое задётся неявно разрядностью операции)
+
+        {\bf CBW, CWD, CWDE, CDQ} --- увеличение разрядности знакового числа. cbw расширяет AL до AX, cwd AX до DX:AX, cwde AX до EAX, cdq EAX до EDX:EAX
+        \begin{table}\small
+            \begin{tabular}{|c|c|c|}
+                \hline Кол-во операндов & Запись & Описание \\
+                \hline 1 & imul r/m & Аналогично mul \\
+                \hline 2 & imul r, r/m & Первый := Первый*Второй \\
+                \hline 3 & imul r, r/m, imm & Первый := Второй*Третий \\
+                \hline
+            \end{tabular}
+        \end{table}
+\end{frame}
+    \section{GDB}
+    \subsection{}
+    \begin{frame}{Отладчик gdb}
+    Программа {\tt gdb} предназначение для отладки программ на различных языках программирования.
+
+    {\bf Использование:} gbd программа
+    \begin{block}{основные команды}
+        \begin{itemize}
+            \item run (r) --- начать выполнение программы
+            \item break (b) --- установить точку остановки
+            \item next instruction (ni) --- следующая инструкция
+            \item step instruction (si) --- следующая инструкция (с заходом в подпрограммы)
+            \item continue (c) --- продолжить выполнение
+            \item info registers (i r) --- показать значение регистров
+            \item print (p)--- распечатать значение регистра или памяти
+            \item quit (q) --- выход
+        \end{itemize}
+    \end{block}
+    \end{frame}
+    \section{Jumps}
+    \subsection{}
+    \begin{frame}{Условные и безусловные переходы}
+        \begin{block}{Виды переходов}
+            \begin{itemize}
+                \item {\bf Дальние} (far) --- для передачи управления в другой сегмент (не используются в <<плоской>>> модели памяти)
+                \item {\bf Близкие} (near) --- для передачи управление в произвольное место внутри одного сегмента
+                \item {\bf  Короткие} (short) --- переходы, используемые для оптимизации и позволяющие прыгать не более чем на 127 байт вперёд и не менее чем на 128 байт назад.
+             \end{itemize}
+        \end{block}
+        Безусловные переходы по умолчанию объявляются близкими.
+
+        Условные переходы по умолчанию объявляются короткими. 
+
+        Если адрес перехода на попадает в необходимый диапазон, то nasm выдаст ошибку следующего вида:
+
+        {\tt error: short jump is out of range}
+    \end{frame}
+    \begin{frame}{Условные и безусловные переходы}
+        \begin{block}{Виды переходов}
+            \begin{itemize}
+                \item {\bf Дальние} (far) --- для передачи управления в другой сегмент (не используются в <<плоской>>> модели памяти)
+                \item {\bf Близкие} (near) --- для передачи управление в произвольное место внутри одного сегмента
+                \item {\bf  Короткие} (short) --- переходы, используемые для оптимизации и позволяющие прыгать не более чем на 127 байт вперёд и не менее чем на 128 байт назад.
+             \end{itemize}
+        \end{block}
+        Безусловные переходы по умолчанию объявляются близкими.
+
+        Условные переходы по умолчанию объявляются короткими. 
+
+        Если адрес перехода на попадает в необходимый диапазон, то nasm выдаст ошибку следующего вида:
+
+        {\tt error: short jump is out of range}
+    \end{frame}
+    \begin{frame}{Условные переходы по отдельным флагам}
+        \begin{table}
+            \begin{tabular}{|c|c||c|c|}
+                \hline команда & условие & команда & условие \\
+                \hline jz & ZF = 1 & jnz & ZF = 0 \\
+                \hline js & SF = 1 & jns & SF = 0 \\
+                \hline jc & CF = 1 & jnc & CF = 0 \\
+                \hline jo & OF = 1 & jno & OF = 0 \\
+                \hline jp & PF = 1 & jnp & PF = 0 \\
+                \hline
+            \end{tabular}
+        \end{table}
+    \end{frame}
+    \begin{frame}{Условные переходы по результатам сравнений}
+        \begin{table}\footnotesize
+            \begin{tabular}{|c|c|c|c|}
+                \hline команда & jump if & Выражение & Условие \\
+                \hline je & equal & $a=b$ & ZF = 1 \\
+                       jne & not equal & $a \ne b$ & ZF = 0 \\
+                \hline jl & less & $a < b$ & SF $\ne$ OF \\
+                       jnge & not greater or equal  & & \\
+                \hline jle & less or equal & $a \le b$ & SF $\ne$ OF или ZF = 1\\
+                       jng & not greater & & \\
+                \hline jg  & greater & $a > b$ & SF=OF и ZF = 0 \\
+                       jnle & not less or equal & & \\
+                \hline jge & greater or equal & $a \ge b$ & SF=OF \\
+                       jnl & not less & & \\
+                \hline jb & below & $a < b$ & CF = 1 \\
+                       jnae & not above or equal  & & \\
+                \hline jbe & below or equal & $a \le b$ & CF=1 или ZF = 1\\
+                       jna & not above & & \\
+                \hline ja  & above & $a > b$ & CF=0 и ZF = 0 \\
+                       jnbe & not less or equal & & \\
+                \hline jae & above or equal & $a \ge b$ & CF=0 \\
+                       jnb & not below & & \\
+                \hline
+            \end{tabular}
+        \end{table}
+    \end{frame}
 \end{document}
