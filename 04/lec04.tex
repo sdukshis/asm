@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[utf8, russian]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[russian]{babel}
@@ -45,7 +45,7 @@
         \pause
         \item Jump'ов разных и побольше!
         \pause
-        \item Логические операции
+        \item Побитовые операции
         \end{enumerate}
     \end{frame}
     \section{Ассемблер NASM}
@@ -342,5 +342,40 @@ sub [a], dword 100  ; [a] := [a] - 100
                 \hline
             \end{tabular}
         \end{table}
+    \end{frame}
+    \begin{frame}{Условные переходы и ECX}
+        Регистр {\bf ECX} традиционно используется как счётчик цикла и в архитектуре x86 присутсвует несколько специальных условных переходов, связанных со значением данного регистра.
+
+        \bigskip
+        {\bf loop} --- уменьшает значение {\bf CX} и делает которкий переход, если CX не равен нулю.
+
+        \bigskip
+        {\bf jcxz} (jump if CX is zero) --- производит условный переход, если значение счётчика {\bf CX} равно нулю.
+
+        \bigskip
+        {\bf loope, jecxz} --- аналогичные команды, работающие со значением регистра {\bf ECX}
+    \end{frame}
+    \section{Побитовые операции}
+    \subsection{}
+    \begin{frame}{Побитовые операции}\footnotesize
+        \begin{block}{логические операции}
+            \begin{itemize}
+                \item {\bf AND} --- логическое "И"
+                \item {\bf OR} --- логическое "ИЛИ"
+                \item {\bf NOT} --- логичское "НЕ"
+                \item {\bf XOR} --- исключающее "ИЛИ"
+                \item {\bf TEST} --- выполняет AND, но только устанавливает флаги
+            \end{itemize}
+        \end{block}
+        \begin{block}{операции сдвига}
+            \begin{itemize}
+                \item {\bf SHR} (shift right) --- простой сдвиг вправо (деление на $2^n$)
+                \item {\bf SHL} (shift left) --- простой сдвиг влево (умножение на $2^n$)
+                \item {\bf SAR} (shift arithmetic right) --- арифметический сдвиг вправо (знаковое деление на $2^n$)
+                \item {\bf SAL} (shift arithmetic left) --- арифметический сдвиг влево (синоним {\bf SHL})
+                \item {\bf ROR} (rotate right) --- циклический сдвиг вправо
+                \item {\bf ROL} (rotate left) --- циклический сдвиг влево
+            \end{itemize}
+        \end{block}
     \end{frame}
 \end{document}
