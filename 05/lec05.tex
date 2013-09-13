@@ -50,7 +50,7 @@
             \pause
             \item Стековый фрейм --- вызрыв мозга или неизбежное зло?
             \pause
-            \item Разные соглашения и передаче параметров
+            \item Разные соглашения о вызове подпрограмм
         \end{itemize}
     \end{frame}
     \section{Стек}
@@ -124,5 +124,147 @@
     \section{Подпрограммы}
     \subsection{}
     \begin{frame}{Подпрограммы}
+
+        {\bf Подпрограммой} называется некоторая обословленная часть программного кода, которая может быть {\bf вызвана} из главной программы (или из другой подпрограммы.)
+        \bigskip
+
+        Под {\bf вызовом} понимается временная передача управления подпрограмме с тем, чтобы, когда подпрограмма сделает свою работу, она вернула управление в точку, откуда её вызвали.
+
+        \bigskip
+        При вызове подпрограммы необходимо запомнить {\bf адрес возврата}, т.е. адрес машинной команды, следующей за командой вызова подпрограммы.
+        \bigskip
+
+        При {\bf вызове} подпрограмме могут передаваться параметры, влияющие на её работу.
+        \bigskip
+
+        Подпрограммы используют в ходе своей работы {\bf локальные переменные}.
     \end{frame}
+    \begin{frame}{Стековый фрейм}
+        \begin{columns}
+        \column{0.3\linewidth}
+        В современных вычислительных системах {\bf параметры}, {\bf адрес возврата} и {\bf локальные переменные} подпрограмм храняться в области стековой памяти, называемой {\bf стековым фреймом}.
+        \column{0.7\linewidth}
+        \includegraphics[width=\linewidth]{fig/stack_frame.pdf}
+        \end{columns}
+    \end{frame}
+    \begin{frame}{Вызов и возврат из подпрограммы}\small
+        Инструкция {\tt call <метка>} сохраняет в стеке адрес возврата и передаёт управление на указанную метку.
+
+        Инстркция {\tt ret} выталкивает из стека адрес возврата и передаёт управление на него.
+
+        \begin{block}{Действия при входе в подпрограмму}\small
+            \begin{enumerate}
+                \item сохранить в стеке значение EBP
+                \item записать в EBP текущий адрес вершины стека (ESP)
+                \item вычесть из ESP число байт под локальные переменные
+                \item сохранить в стеке все регистры, которые будут изменены в подпрограмме (включая EFLAGS)
+            \end{enumerate}
+        \end{block}
+
+        \begin{block}{Действия при выходе из подпрограммы}\small
+            \begin{enumerate}
+                \item восстановить значение всех регистров (включая EFLAGS)
+                \item записать в ESP значение EBP
+                \item восстановить старое значение EBP из стека
+                \item вернуться в основную программу ({\tt  ret})
+            \end{enumerate}
+        \end{block}
+    \end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Пример (Алгоритм Евклида)}
+        \begin{columns}[T]
+            \scriptsize
+            \column{0.4\linewidth}
+            Главная программа
+            \begin{verbatim}
+%include "stud_io.inc"
+
+global _start
+
+section .text
+_start:
+    push 169    ; b := 169
+    push 39     ; a := 39
+    call gcd    ; eax := gcd(a,b)
+    add esp, 8  ; 
+    push eax    
+    call printint
+    add esp, 4
+
+    FINISH
+            \end{verbatim}
+            \column{0.6\linewidth}
+            Подпрограмма {\tt gcd}
+            \begin{verbatim}
+gcd:    push ebp
+        mov ebp, esp
+        push ebx
+        push edx
+        pushf
+while:  cmp [ebp+12], dword 0 ; b <> 0
+        je wend
+        mov eax, [ebp+8]  ; eax := a
+        mov ebx, [ebp+12] ; ebx := b
+        cdq               ; eax -> [edx:eax]
+        idiv ebx          ; edx := a mod b
+        mov [ebp+8],  ebx ; a := b
+        mov [ebp+12], edx ; b := edx
+        jmp while
+wend:   mov eax, [ebp + 8] ; return a
+        popf
+        pop edx
+        pop ebx
+        mov esp, ebp
+        pop ebp
+        ret
+            \end{verbatim}
+        \end{columns}
+\end{frame}
+    \begin{frame}[fragile]
+        \frametitle{Соглашения о вызове подпрограмм}
+    \begin{block}{Что регламентируюется:}\small
+        \begin{itemize}
+            \item как передаются параметры (через регистры или через стек)
+            \item в каком порядке
+            \item кто восстанавливает стек (вызываемая или вызывающая подпрограмма)
+            \item как возвращается результат
+        \end{itemize}
+    \end{block}
+        \centerline{func(fd, msg, len)}
+        \begin{columns}
+            \column{0.5\linewidth}
+            \centerline{cdelc:}
+            \begin{columns}
+                \column{0.5\linewidth}
+                    \begin{figure}
+                        \includegraphics[width=\linewidth]{fig/cdecl.pdf}
+                    \end{figure}
+                \column{0.5\linewidth}
+                \begin{verbatim}
+push len
+push msg
+push fd
+call func
+add esp, 12
+                \end{verbatim}
+            \end{columns}
+
+            \column{0.5\linewidth}
+            \centerline{pascal:}
+            \begin{columns}
+                \column{0.5\linewidth}
+                    \begin{figure}
+                        \includegraphics[width=\linewidth]{fig/pascal.pdf}
+                    \end{figure}
+                \column{0.5\linewidth}
+                \begin{verbatim}
+push fd
+push msg
+push len
+call func
+
+                \end{verbatim}
+            \end{columns}
+        \end{columns}
+\end{frame}
 \end{document}
