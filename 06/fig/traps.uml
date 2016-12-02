@@ -1,0 +1,12 @@
+@startuml
+
+participant "Центральный процессор" as CPU
+participant "Обработчик прерывания" as IH
+
+CPU -> CPU: операция
+CPU -> CPU: прерывание
+CPU -> CPU: малое упрятывание (EIP, EFLAGS)
+CPU -> CPU: переход в привелигированный режим
+CPU -> IH: передача управления
+
+@enduml

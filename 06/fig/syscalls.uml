@@ -1,0 +1,14 @@
+@startuml
+
+participant "Программа" as Programm
+participant "Центральный процессор" as CPU
+participant "Обработчик прерывания (ОС)" as IH
+
+Programm -> CPU: запрос прерывания c номером
+CPU -> CPU: малое упрятывание (EIP, EFLAGS)
+CPU -> CPU: переход в привелигированный режим
+CPU -> IH: передача управления
+IH -> IH: обработка вызова
+IH -> IH: Programm: код возврата
+
+@enduml
